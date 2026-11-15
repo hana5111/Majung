@@ -12,9 +12,10 @@ android {
         applicationId = "kr.ddakta.pickup"
         minSdk = 28
         targetSdk = 34
-        versionCode = 10
-        versionName = "0.2.1"
+        versionCode = 11
+        versionName = "0.2.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("boolean", "DEMO_MODE", providers.gradleProperty("ddaktaDemoMode").orElse("true").get().toBoolean().toString())
         buildConfigField("String", "API_URL", buildString(providers.gradleProperty("ddaktaApiUrl").orElse("http://10.0.2.2:8787").get()))
         buildConfigField("String", "INVITE_ORIGIN", buildString(providers.gradleProperty("ddaktaInviteOrigin").orElse("http://127.0.0.1:8787").get()))
         buildConfigField("String", "GLEO_PACKAGE", buildString(providers.gradleProperty("ddaktaGleoPackage").orElse("ai.umos.ambientai").get()))

@@ -61,6 +61,15 @@ class ContactInviteActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         voiceReplied = savedInstanceState?.getBoolean("voiceReplied") ?: false
         val fromVoice = intent.action in setOf(SHARE_INVITATION_ACTION, QUALIFIED_SHARE_INVITATION_ACTION)
+        if (BuildConfig.DEMO_MODE) {
+            if (fromVoice && !voiceReplied) {
+                GleoTransport(this, BuildConfig.GLEO_PACKAGE).send(InvitationShareVoice.response(false).toString())
+                voiceReplied = true
+            }
+            android.widget.Toast.makeText(this, "운전자 화면 시연에서는 문자 발송을 지원하지 않아요.", android.widget.Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
         val request = runCatching {
             val raw = if (intent.hasExtra("ACTION_PARAM")) requireNotNull(intent.getStringExtra("ACTION_PARAM")) else JSONObject().apply {
                 InvitationShareRequest.parameters.forEach { key -> if (intent.hasExtra(key)) put(key, requireNotNull(intent.getStringExtra(key))) }

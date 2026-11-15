@@ -157,7 +157,8 @@ fun VoiceCreateScreen(
                 VoiceSummary("탑승자", d.name, saving) { audio?.stop(); conversation = conversation.edit(VoiceField.NAME); onDraftChange(conversation.draft) }
                 VoiceSummary("만날 장소", d.place, saving) { audio?.stop(); conversation = conversation.edit(VoiceField.PLACE); onDraftChange(conversation.draft) }
                 Spacer(Modifier.height(20.dp))
-                Text("목적지를 확인하고 출발하면\n내비 도착 시간이 초대 링크에 반영돼요.", color = Muted, fontSize = 12.sp, lineHeight = 21.sp)
+                Text(if (BuildConfig.DEMO_MODE) "목적지를 확인하고 출발하면\n운전자 화면에서 내비 도착 시간을 확인해요."
+                    else "목적지를 확인하고 출발하면\n내비 도착 시간이 초대 링크에 반영돼요.", color = Muted, fontSize = 12.sp, lineHeight = 21.sp)
                 TextButton(enabled = !saving, onClick = { audio?.stop(); onManual(d) }, contentPadding = PaddingValues(top = 16.dp)) { Text("입력 화면에서 이어서 작성", fontSize = 13.sp) }
             }
         }

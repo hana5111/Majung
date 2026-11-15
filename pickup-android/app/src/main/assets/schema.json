@@ -2,7 +2,7 @@
   "packageName": "kr.ddakta.pickup",
   "appDescription": "Majung (마중) helps a driver pick someone up now. Choose only passenger and destination, depart with car navigation, and share live navigation ETA in an invitation link. No scheduled meeting date or time is needed.",
   "invokeWord": "마중",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "actionCalls": [
     {
       "type": "function",

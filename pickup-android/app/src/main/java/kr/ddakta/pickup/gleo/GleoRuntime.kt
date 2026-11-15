@@ -21,7 +21,7 @@ object GleoRuntime {
     const val NAVIGATION_HANDOFF = "navigation_handoff"
     private const val NAVIGATION_SESSIONS = "navigation_sessions"
     @Volatile private var coordinator: GleoPickup? = null
-    private val profile = java.security.MessageDigest.getInstance("SHA-256").digest(BuildConfig.API_URL.toByteArray()).take(8).joinToString("") { "%02x".format(it) }
+    private val profile = java.security.MessageDigest.getInstance("SHA-256").digest((if (BuildConfig.DEMO_MODE) "local-demo" else BuildConfig.API_URL).toByteArray()).take(8).joinToString("") { "%02x".format(it) }
     fun preferences(context: Context): SharedPreferences = context.applicationContext.getSharedPreferences("ddakta_gleo_$profile", Context.MODE_PRIVATE)
     fun store(context: Context): GleoSessionStore = object : GleoSessionStore {
         private val prefs = preferences(context)

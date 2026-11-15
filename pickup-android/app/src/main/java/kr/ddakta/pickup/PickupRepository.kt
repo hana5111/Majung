@@ -37,9 +37,14 @@ data class Appointment(
 }
 
 class PickupRepository(context: Context, private val connectTimeoutMs: Int = 4000, private val readTimeoutMs: Int = 5000) {
-    companion object { private val connectionLock = Any() }
+    companion object { private val connectionLock = Any(); private val localLock = Any() }
     private val prefs = context.getSharedPreferences("ddakta_connection", Context.MODE_PRIVATE)
     private val key = "driver_${BuildConfig.API_URL}"
+    private val localStore by lazy {
+        val local = context.getSharedPreferences("majung_local_pickups", Context.MODE_PRIVATE)
+        LocalPickupStore(read = { local.getString("appointments", null) },
+            write = { check(local.edit().putString("appointments", it).commit()) { "약속을 저장하지 못했어요. 다시 시도해 주세요." } }, lock = localLock)
+    }
     private fun driverToken(): String = synchronized(connectionLock) {
         prefs.getString(key, null)?.let { return@synchronized it }
         val result = call("POST", "/api/drivers", JSONObject().put("displayName", "운전자"), authenticate = false)
@@ -67,20 +72,29 @@ class PickupRepository(context: Context, private val connectTimeoutMs: Int = 400
         } finally { c.disconnect() }
     }
     fun list(): List<Appointment> {
+        if (BuildConfig.DEMO_MODE) return localStore.list()
         val a = call("GET", "/api/appointments").getJSONArray("appointments")
         return (0 until a.length()).map { Appointment.parse(a.getJSONObject(it)) }
     }
     fun create(name: String, contact: String, place: String, point: String, time: Instant?, note: String, clientRequestId: String? = null, pickupLocation: PickupLocation? = null): Appointment =
-        Appointment.parse(call("POST", "/api/appointments", JSONObject()
+        if (BuildConfig.DEMO_MODE) localStore.create(name, contact, place, point, time, note, clientRequestId, pickupLocation)
+        else Appointment.parse(call("POST", "/api/appointments", JSONObject()
             .put("passengerName", name).put("passengerContact", contact).put("place", place)
             .put("meetingPoint", point).put("meetingAt", time?.toString() ?: JSONObject.NULL).put("note", note)
             .put("pickupMode", if (time == null) "NOW" else "SCHEDULED")
             .apply { if (clientRequestId != null) put("clientRequestId", clientRequestId)
                 if (pickupLocation != null) put("pickupLocation", pickupLocation.toJson()) }))
-    fun setPickupLocation(a: Appointment, location: PickupLocation): Appointment = Appointment.parse(call("POST", "/api/appointments/${a.id}/location",
+    fun setPickupLocation(a: Appointment, location: PickupLocation): Appointment = if (BuildConfig.DEMO_MODE) localStore.setPickupLocation(a, location) else Appointment.parse(call("POST", "/api/appointments/${a.id}/location",
         JSONObject().put("expectedVersion", a.version).put("pickupLocation", location.toJson())))
-    fun cancel(id: String): Appointment = Appointment.parse(call("POST", "/api/appointments/$id/cancel", JSONObject()))
-    fun updateTrip(a: Appointment, state: String, observedAt: Long, remainingSeconds: Int? = null): Appointment = Appointment.parse(call("POST", "/api/appointments/${a.id}/trip",
+    fun cancel(id: String): Appointment = if (BuildConfig.DEMO_MODE) localStore.cancel(id) else Appointment.parse(call("POST", "/api/appointments/$id/cancel", JSONObject()))
+    fun updateTrip(a: Appointment, state: String, observedAt: Long, remainingSeconds: Int? = null): Appointment = if (BuildConfig.DEMO_MODE) localStore.updateTrip(a, state, observedAt, remainingSeconds) else Appointment.parse(call("POST", "/api/appointments/${a.id}/trip",
         JSONObject().put("state", state).put("observedAt", observedAt).put("remainingSeconds", remainingSeconds ?: JSONObject.NULL)
             .put("pickupLocation", requireNotNull(a.pickupLocation).toJson())))
+
+    fun demoAppointment(): Appointment = synchronized(localLock) {
+        check(BuildConfig.DEMO_MODE)
+        val note = "운전자 화면 시연용 예시 약속"
+        list().firstOrNull { it.active && it.note == note } ?: create("지우", "", "수원역 1호선", "1번 출구", null, note,
+            pickupLocation = PickupLocation(37.26596, 126.99988, "수원역 1호선", "팔달구 매산로1가"))
+    }
 }

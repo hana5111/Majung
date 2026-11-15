@@ -124,7 +124,7 @@ private fun DdaktaContent(repository: PickupRepository, foreground: Boolean, req
         val tripRuntime by PickupTripRuntime.state.collectAsState()
         LaunchedEffect(tripRuntime.readyToShare, tripRuntime.appointmentId, foreground, saving) {
             if (foreground && !saving && tripRuntime.readyToShare) {
-                context.startActivity(Intent(context, ContactInviteActivity::class.java)
+                if (!BuildConfig.DEMO_MODE) context.startActivity(Intent(context, ContactInviteActivity::class.java)
                     .putExtra("appointmentId", tripRuntime.appointmentId).putExtra("recipientName", tripRuntime.passengerName))
                 PickupTripRuntime.invitationOpened(tripRuntime.appointmentId)
             }
@@ -183,7 +183,8 @@ private fun DdaktaContent(repository: PickupRepository, foreground: Boolean, req
                 if (confirmed != null) scope.launch { snackbar.showSnackbar("${confirmed.passengerName}님이 수락했어요. 픽업 약속이 확정됐습니다.") }
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
-                error = e.message?.takeIf { it.contains("주세요") } ?: "약속 서버에 연결할 수 없어요. 서버 실행과 네트워크를 확인해 주세요."
+                error = e.message?.takeIf { it.contains("주세요") } ?: if (BuildConfig.DEMO_MODE) "저장된 약속을 읽지 못했어요. 다시 시도해 주세요."
+                    else "약속 서버에 연결할 수 없어요. 서버 실행과 네트워크를 확인해 주세요."
             }
         }
 
@@ -199,7 +200,8 @@ private fun DdaktaContent(repository: PickupRepository, foreground: Boolean, req
                 if (location != null) runCatching { PickupTripService.start(context, a) }.onFailure {
                     scope.launch { snackbar.showSnackbar("픽업은 저장됐어요. 상세 화면에서 다시 출발해 주세요.") }
                 }
-                scope.launch { snackbar.showSnackbar(if (location != null) "내비 경로가 확인되면 도착 시간과 초대 문자를 준비해요." else "목적지를 확인한 뒤 출발해 주세요.") }
+                scope.launch { snackbar.showSnackbar(if (BuildConfig.DEMO_MODE) "약속을 이 기기에 저장했어요. 운전자 화면에서 시연할 수 있어요."
+                    else if (location != null) "내비 경로가 확인되면 도착 시간과 초대 문자를 준비해요." else "목적지를 확인한 뒤 출발해 주세요.") }
                 null
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
@@ -214,7 +216,19 @@ private fun DdaktaContent(repository: PickupRepository, foreground: Boolean, req
 
         Scaffold(modifier = Modifier.glassBackdrop(), containerColor = Color.Transparent, snackbarHost = { SnackbarHost(snackbar) }) { insets ->
             Column(Modifier.fillMaxSize().padding(insets).padding(horizontal = 32.dp, vertical = 20.dp)) {
-                AppHeader(enabled = !saving, onHome = { screen = "home" })
+                AppHeader(enabled = !saving, onHome = { screen = "home" }, onDemo = {
+                    scope.launch {
+                        saving = true
+                        try {
+                            val demo = withContext(Dispatchers.IO) { repository.demoAppointment() }
+                            appointments = withContext(Dispatchers.IO) { repository.list() }
+                            localRevision++; selectedId = demo.id; screen = "detail"; loaded = true; error = ""
+                        } catch (e: Exception) {
+                            if (e is kotlinx.coroutines.CancellationException) throw e
+                            snackbar.showSnackbar(e.message ?: "시연 약속을 준비하지 못했어요.")
+                        } finally { saving = false }
+                    }
+                })
                 Spacer(Modifier.height(if (screen == "home") 32.dp else 20.dp))
                 if (error.isNotEmpty()) {
                     Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFFFFF2DD)).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -265,7 +279,8 @@ private fun DdaktaContent(repository: PickupRepository, foreground: Boolean, req
                                     } finally { saving = false }
                                 }
                             },
-                            onShare = { context.startActivity(Intent(context, ContactInviteActivity::class.java).putExtra("appointmentId", selected.id).putExtra("recipientName", selected.passengerName)) },
+                            onShare = { if (BuildConfig.DEMO_MODE) PassengerDemoStore.accept(context, selected)
+                                else context.startActivity(Intent(context, ContactInviteActivity::class.java).putExtra("appointmentId", selected.id).putExtra("recipientName", selected.passengerName)) },
                             onCopy = {
                                 (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
                                     .setPrimaryClip(ClipData.newPlainText("$appName 초대", selected.inviteUrl))
@@ -286,7 +301,7 @@ private fun DdaktaContent(repository: PickupRepository, foreground: Boolean, req
             if (cancelDialog && selected != null) AlertDialog(
                 onDismissRequest = { if (!saving) cancelDialog = false },
                 title = { Text("픽업 약속을 취소할까요?") },
-                text = { Text("탑승자의 링크에도 취소 상태가 표시됩니다.") },
+                text = { Text(if (BuildConfig.DEMO_MODE) "이 기기에 저장된 픽업 약속을 취소합니다." else "탑승자의 링크에도 취소 상태가 표시됩니다.") },
                 confirmButton = { TextButton(enabled = !saving, onClick = {
                     scope.launch {
                         saving = true
@@ -309,12 +324,17 @@ private fun DdaktaContent(repository: PickupRepository, foreground: Boolean, req
     }
 }
 
-@Composable private fun AppHeader(enabled: Boolean, onHome: () -> Unit) {
+@Composable private fun AppHeader(enabled: Boolean, onHome: () -> Unit, onDemo: () -> Unit) {
     Row(Modifier.fillMaxWidth().height(48.dp), verticalAlignment = Alignment.CenterVertically) {
         Row(Modifier.height(48.dp).widthIn(min = 48.dp).clip(RoundedCornerShape(16.dp))
             .clickable(enabled = enabled, onClickLabel = "홈으로", role = Role.Button, onClick = onHome),
             verticalAlignment = Alignment.CenterVertically) {
             MajungLogo()
+        }
+        if (BuildConfig.DEMO_MODE) {
+            Spacer(Modifier.weight(1f))
+            Text("운전자 화면 시연", color = Muted, fontSize = 13.sp, modifier = Modifier.padding(end = 16.dp))
+            TextButton(enabled = enabled, onClick = onDemo) { Text("시연 약속 열기", color = Forest, fontSize = 15.sp) }
         }
     }
 }
@@ -407,7 +427,7 @@ private fun DdaktaContent(repository: PickupRepository, foreground: Boolean, req
                 } else {
                     Text(if (!loaded && error.isEmpty()) "약속을 불러오는 중" else "아직 예정된\n픽업이 없어요", fontSize = 32.sp, lineHeight = 43.sp, fontWeight = FontWeight.Normal, modifier = Modifier.padding(top = 30.dp))
                     Spacer(Modifier.weight(1f))
-                    Text("새 약속을 만들고 탑승자를 초대해 보세요.", color = Muted, fontSize = 14.sp, modifier = Modifier.padding(top = 24.dp))
+                    Text(if (BuildConfig.DEMO_MODE) "시연 약속을 열거나 새로운 픽업을 만들어 보세요." else "새 약속을 만들고 탑승자를 초대해 보세요.", color = Muted, fontSize = 14.sp, modifier = Modifier.padding(top = 24.dp))
                 }
             }
             Column(Modifier.weight(1f).fillMaxHeight().liquidGlass(lime = true, ribbon = true)
@@ -431,7 +451,7 @@ private fun DdaktaContent(repository: PickupRepository, foreground: Boolean, req
                 Row(verticalAlignment = Alignment.CenterVertically) { Text("전체 보기", color = Muted, fontSize = 13.sp); Spacer(Modifier.width(5.dp)); LineIcon("chevron", Muted, 15) }
             }
             if (active.isEmpty()) {
-                Text("탑승자가 초대를 수락하면 약속이 확정됩니다.", color = Muted, fontSize = 14.sp, modifier = Modifier.padding(vertical = 24.dp))
+                Text(if (BuildConfig.DEMO_MODE) "저장한 약속을 열어 운전자 화면을 확인할 수 있어요." else "탑승자가 초대를 수락하면 약속이 확정됩니다.", color = Muted, fontSize = 14.sp, modifier = Modifier.padding(vertical = 24.dp))
             } else active.take(2).forEachIndexed { i, a ->
                 if (i > 0) HorizontalDivider(color = Line)
                 AppointmentCard(a) { onSelect(a) }
@@ -526,13 +546,14 @@ private fun CreateAppointment(saving: Boolean, foreground: Boolean, initialDraft
         Spacer(Modifier.height(30.dp))
         Column(Modifier.fillMaxWidth()) {
             Text("만나는 시간은 내비가 계산해요", color = Forest, fontSize = 19.sp, fontWeight = FontWeight.Medium)
-            Text("출발하면 도착 예상 시간이 초대 링크에 반영돼요. 연락처에서 받는 사람을 찾아 초대 문자를 준비합니다.", color = Forest.copy(alpha = .75f), fontSize = 14.sp, lineHeight = 23.sp, modifier = Modifier.padding(top = 10.dp))
+            Text(if (BuildConfig.DEMO_MODE) "내비 경로가 확인되면 운전자 화면에 도착 예상 시간을 표시해요. 약속은 이 기기에 저장합니다."
+                else "출발하면 도착 예상 시간이 초대 링크에 반영돼요. 연락처에서 받는 사람을 찾아 초대 문자를 준비합니다.", color = Forest.copy(alpha = .75f), fontSize = 14.sp, lineHeight = 23.sp, modifier = Modifier.padding(top = 10.dp))
         }
         if (location != null) GlassButton(primary = true, enabled = foreground && !saving && name.isNotBlank(), onClick = {
             val selected = location ?: return@GlassButton
             onCreate(name.trim(), "", selected.name, "", null, "", selected)
         }, modifier = Modifier.fillMaxWidth().padding(top = 26.dp).height(56.dp)) {
-            Text(if (saving) "픽업 준비 중…" else "출발하고 초대 준비", fontSize = 17.sp)
+            Text(if (saving) "픽업 준비 중…" else if (BuildConfig.DEMO_MODE) "픽업 저장하고 길 안내" else "출발하고 초대 준비", fontSize = 17.sp)
         }
     }
     if (choosingLocation) PickupLocationPicker(navigation, foreground, place, location, saving,
@@ -615,11 +636,13 @@ private fun CreateAppointment(saving: Boolean, foreground: Boolean, initialDraft
                 val confirmed = a.status == "CONFIRMED"
                 val invitationLabel = when {
                     !a.active -> a.label
+                    BuildConfig.DEMO_MODE -> "수락 대기 · 시연"
                     confirmed -> "약속 확정"
                     !a.canShare -> "초대 준비 중"
                     else -> "수락 대기"
                 }
                 val invitationDescription = when {
+                    BuildConfig.DEMO_MODE && a.active -> "초대 수락 시연을 누르면\n가상 탑승자 위치를 확인할 수 있어요."
                     confirmed -> "탑승자가 초대를 수락했어요.\n만남 정보를 함께 확인할 수 있어요."
                     a.status == "DECLINED" -> "탑승자가 초대를 거절했어요."
                     !a.active -> "이 픽업 약속은 종료됐어요."
@@ -644,10 +667,10 @@ private fun CreateAppointment(saving: Boolean, foreground: Boolean, initialDraft
                     Spacer(Modifier.weight(1f))
                     GlassButton(enabled = a.pickupLocation != null && !saving, onClick = onShare, primary = true,
                         modifier = Modifier.fillMaxWidth().height(54.dp)) {
-                        Text("초대 문자 준비", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                        Text(if (BuildConfig.DEMO_MODE) "초대 수락 시연" else "초대 문자 준비", fontSize = 16.sp, fontWeight = FontWeight.Medium)
                     }
                     Row(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                        TextButton(enabled = a.canShare && !saving, onClick = onCopy,
+                        if (!BuildConfig.DEMO_MODE) TextButton(enabled = a.canShare && !saving, onClick = onCopy,
                             colors = ButtonDefaults.textButtonColors(contentColor = Forest, disabledContentColor = Muted.copy(alpha = .65f))) {
                             Text("초대 링크 복사", fontSize = 14.sp)
                         }

@@ -70,7 +70,7 @@ class PickupTripService : Service() {
                         val first = !shared; shared = true; lastPublish = elapsed
                         PickupTripRuntime.mutable.value = PickupTripRuntime.mutable.value.copy(running = true,
                             readyToShare = first || PickupTripRuntime.mutable.value.readyToShare, passengerName = current.passengerName,
-                            notice = "${updated.timeLabel()} · 초대 링크에도 반영됩니다.")
+                            notice = if (BuildConfig.DEMO_MODE) "${updated.timeLabel()} · 운전자 화면 시연" else "${updated.timeLabel()} · 초대 링크에도 반영됩니다.")
                         if (android.os.Build.VERSION.SDK_INT < 33 || checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED)
                             getSystemService(NotificationManager::class.java).notify(NOTIFICATION, notification(updated.timeLabel()))
                     } else if (shared && seconds == null && elapsed - lastPublish > 9000) {
@@ -86,7 +86,8 @@ class PickupTripService : Service() {
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) {
                 PickupTripRuntime.mutable.value = PickupTripRuntime.mutable.value.copy(notice = e.message?.takeIf { it.contains("요") || it.contains("주세요") }
-                    ?: "도착 시간 공유가 중단됐어요. 서버와 내비 연결을 확인한 뒤 다시 출발해 주세요.")
+                    ?: if (BuildConfig.DEMO_MODE) "도착 시간을 확인하지 못했어요. 내비 연결을 확인한 뒤 다시 출발해 주세요."
+                    else "도착 시간 공유가 중단됐어요. 서버와 내비 연결을 확인한 뒤 다시 출발해 주세요.")
             } finally {
                 releaseNavigation()
                 if (!stopping) {

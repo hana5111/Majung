@@ -77,7 +77,8 @@ internal fun PickupNavigationPanel(a: Appointment, foreground: Boolean, saving: 
                 else PickupTripService.start(context, requireNotNull(latest))
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                error = if (e is IllegalArgumentException) e.message.orEmpty() else "출발 전 약속을 확인하지 못했어요. 서버 연결을 확인한 뒤 다시 눌러 주세요."
+                error = if (e is IllegalArgumentException) e.message.orEmpty() else if (BuildConfig.DEMO_MODE) "출발 전 약속을 확인하지 못했어요. 저장된 약속을 다시 확인해 주세요."
+                    else "출발 전 약속을 확인하지 못했어요. 서버 연결을 확인한 뒤 다시 눌러 주세요."
             } finally { checking = false }
         }
     }

@@ -19,8 +19,8 @@ fun GleoDraftScreen(session: GleoSession, onHome: () -> Unit, onInvitation: (Str
     val created = session.phase == GleoPhase.CREATED
     val title = when(session.phase) {
         GleoPhase.DRAFT -> "약속 내용을 확인하고 있어요"
-        GleoPhase.REVIEW -> "이 내용으로 초대를 만들까요?"
-        GleoPhase.SUBMITTING -> "초대 생성 결과를 확인하고 있어요"
+        GleoPhase.REVIEW -> if (BuildConfig.DEMO_MODE) "이 내용으로 픽업을 저장할까요?" else "이 내용으로 초대를 만들까요?"
+        GleoPhase.SUBMITTING -> if (BuildConfig.DEMO_MODE) "픽업을 저장하고 있어요" else "초대 생성 결과를 확인하고 있어요"
         GleoPhase.CREATED -> "픽업이 준비됐어요"
         GleoPhase.CANCELLED -> "초안 작성을 취소했어요"
         GleoPhase.EXPIRED -> "약속 초안이 만료됐어요"
@@ -40,7 +40,8 @@ fun GleoDraftScreen(session: GleoSession, onHome: () -> Unit, onInvitation: (Str
                 Text(title, fontSize = 26.sp, lineHeight = 37.sp, color = Forest, fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 24.dp))
                 val explanation = when(session.phase) {
                     GleoPhase.DRAFT -> "글레오가 빠진 내용을 물어보면 답해 주세요."
-                    GleoPhase.REVIEW -> "탑승자와 목적지를 확인하고 글레오에게 답해 주세요. 확인 후에만 초대를 생성합니다."
+                    GleoPhase.REVIEW -> if (BuildConfig.DEMO_MODE) "탑승자와 목적지를 확인하고 글레오에게 답해 주세요. 확인한 약속을 이 기기에 저장합니다."
+                        else "탑승자와 목적지를 확인하고 글레오에게 답해 주세요. 확인 후에만 초대를 생성합니다."
                     GleoPhase.SUBMITTING -> "결과를 확인하지 못했다면 앱의 약속 목록을 확인하거나 같은 내용으로 다시 요청해 주세요."
                     GleoPhase.CREATED -> "말씀하신 장소로 내비 검색을 연결해요. 검색 결과에서 목적지를 정한 뒤 마중에서 장소를 확인하고 출발해 주세요."
                     else -> "새 약속은 홈에서 시작할 수 있어요."
