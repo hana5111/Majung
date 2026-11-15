@@ -43,6 +43,8 @@ pickup-server/           Node.js 약속 API 서버
 pickup-web/              탑승자 초대·수락 웹
 ```
 
+실제 차량용 앱은 `pickup-android`에 있으며, `pickup-prototype`은 초기 웹 시안입니다.
+
 `pickup-server`가 형제 폴더인 `pickup-web`의 파일을 제공하므로 두 폴더의 상대 위치를 유지해야 합니다. 제출 소스 ZIP에는 위 실행 소스와 테스트를 포함합니다.
 
 **설치 파일:** GitHub Releases에 첨부하는 `Majung-v0.2.1-pleos-debug.apk`를 사용합니다. 같은 버전의 소스 ZIP은 `Majung-v0.2.1-source.zip`입니다.
