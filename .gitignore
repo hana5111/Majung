@@ -20,3 +20,5 @@ local.properties
 keystore.properties
 signing.properties
 deliverables/
+.signing/
+!apk/오하나_마중_release.apk
