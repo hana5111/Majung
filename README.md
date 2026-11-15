@@ -7,7 +7,7 @@
 
 <img width="3200" height="1800" alt="majung-onepager" src="docs/assets/majung-onepager.png" />
 
-[**48초 시연 영상 보기**](docs/assets/majung-demo.mp4) · [원페이저 원본 이미지](docs/assets/majung-onepager.png)
+[**48초 시연 영상 보기**](docs/assets/majung-demo.mp4) · [앱 화면 시안 이미지](docs/assets/majung-app-screens.png)
 
 ## 주요 기능
 
