@@ -15,8 +15,6 @@
 - **팀명·버전:** 오하나 · **0.2.2** (`versionCode 11`) · 제출 전용 키로 서명한 Release
 - **파일 확인:** [SHA-256 체크섬](apk/SHA256SUMS.txt)
 
-기존 제출 Release와 같은 키로 서명하여 업데이트할 수 있습니다. 다른 키로 서명한 Debug APK가 설치되어 있으면 새 AVD 사용을 권장합니다. 기존 앱을 삭제한 뒤 설치할 수도 있지만, 삭제하면 해당 앱의 로컬 데이터도 지워집니다.
-
 ## 실행 방법
 
 ### 설치 및 실행
@@ -91,7 +89,7 @@ Windows에서는 `./gradlew` 대신 `gradlew.bat`을 사용합니다. 별도 속
 
 ### 개발 옵션: API·탑승자 웹 연동
 
-공식 심사 시연에는 필요하지 않습니다. `pickup-server`와 `pickup-web`은 기존 API·초대 웹을 테스트하는 개발 옵션이며, 두 폴더의 상대 위치를 유지합니다. Node.js 22.12 이상에서 `pickup-server`의 `npm start`로 로컬 서버를 실행한 뒤, `pickup-android`에서 다음과 같이 빌드합니다.
+`pickup-server`와 `pickup-web`은 기존 API·초대 웹을 테스트하는 개발 옵션이며, 두 폴더의 상대 위치를 유지합니다. Node.js 22.12 이상에서 `pickup-server`의 `npm start`로 로컬 서버를 실행한 뒤, `pickup-android`에서 다음과 같이 빌드합니다.
 
 ```sh
 ./gradlew :app:assembleDebug \
@@ -111,22 +109,6 @@ Windows에서는 `./gradlew` 대신 `gradlew.bat`을 사용합니다. 별도 속
 
 실제 차량 앱 소스는 **`pickup-android`**, `pickup-prototype`은 **초기 웹 시안**입니다.
 
-## 검증 결과
-
-2026-11-15 운전자 화면 시연용 0.2.2 기준:
-
-- Android 단위 테스트 **67개 통과**. 로컬 저장·재오픈·동시성·저장 실패 검사 **10개** 포함.
-- Release APK 빌드·제출 전용 키 서명 완료. 기존 제출 Release와 같은 인증서이며 디버깅은 비활성화했습니다.
-- `lintRelease`: **오류 0개 · 경고 25개**.
-- 별도 Pleos 에뮬레이터에서 **네트워크를 끈 상태로 예시 약속 저장·초대 수락 시연·가상 위치 표시**를 확인했습니다.
-- 앱을 강제 종료하고 다시 실행해도 기기에 저장한 약속이 유지되는 것을 확인했습니다.
-
-```sh
-cd pickup-android
-./gradlew :app:testDebugUnitTest :app:lintRelease
-```
-
-실제 문자 발송·휴대폰 GPS 공유·전체 음성 왕복·실차 주행은 검증 범위에 포함하지 않았습니다.
 
 ## 외부 리소스
 
