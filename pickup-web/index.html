@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f2f3f1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>마중 · 픽업 약속</title>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" type="module"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="brandbar">
+        <a class="brand" href="/" aria-label="마중 홈"><img src="/icon.svg" alt="" />마중</a>
+        <span class="page-tab">픽업 초대</span>
+        <span class="header-note">탑승자용</span>
+      </header>
+      <main>
+        <section id="loading" class="notice"><div class="spinner"></div><h1>약속을 확인하고 있어요</h1><p>잠시만 기다려 주세요.</p></section>
+        <section id="error" class="notice hidden"><span class="notice-icon">!</span><h1 id="error-title">약속을 불러오지 못했어요</h1><p id="error-message"></p><button id="retry" class="primary">다시 확인하기</button></section>
+        <article id="appointment" class="hidden">
+          <header class="page-heading">
+            <div><h1 id="headline">픽업 약속</h1><p id="intro" class="intro"></p></div>
+            <div id="status" class="status pending"><span></span><b id="status-label">응답 대기</b></div>
+          </header>
+          <section class="meeting-card" aria-label="약속 내용">
+            <div id="time-label" class="card-label">차량 도착까지</div>
+            <div class="time-row"><strong id="time"></strong><span id="date"></span></div>
+            <div class="place-row"><span class="pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 9c0 5-7 12-7 12S5 14 5 9a7 7 0 1 1 14 0Z"/><circle cx="12" cy="9" r="2.3"/></svg></span><div><h2 id="place"></h2><p id="meeting-point"></p></div></div>
+            <div id="pickup-location-box" class="note hidden"><span>선택한 정확한 승차 위치</span><p id="pickup-location-name"></p><p id="pickup-location-address"></p></div>
+            <dl class="people">
+              <div><span class="person-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg></span><div><dt>운전자</dt><dd id="driver-name"></dd></div></div>
+              <div><span class="person-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg></span><div><dt>탑승자</dt><dd id="passenger-name"></dd></div></div>
+            </dl>
+            <div id="note-box" class="note hidden"><span>전달 메모</span><p id="note"></p></div>
+          </section>
+          <aside class="action-card" aria-label="약속 응답">
+            <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            <section id="response" class="response">
+              <h2>이곳에서 만날까요?</h2>
+              <p class="response-info">목적지와 차량 도착 시간을 확인해 주세요.<br />수락하면 차량에도 확정으로 표시됩니다.</p>
+              <button id="accept" class="primary">약속 수락하기</button>
+              <button id="decline" class="secondary">만나기 어려워요</button>
+              <div id="decline-confirm" class="decline-confirm hidden"><p>약속을 거절할까요? 목적지 변경은 운전자와 상의해 주세요.</p><div><button id="decline-back" class="secondary">돌아가기</button><button id="decline-submit" class="danger">약속 거절</button></div></div>
+            </section>
+            <div id="confirmed-box" class="confirmed-box hidden"><span class="check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 12 4 4 8-9"/></svg></span><h2>약속이 확정됐어요</h2><p>운전자에게 수락을 전달했어요.<br />같은 목적지에서 만나요. 도착 예상 시간은 계속 갱신돼요.</p></div>
+            <p id="closed-message" class="closed-message hidden"></p>
+            <p id="action-error" class="action-error" role="alert"></p>
+            <div class="sync"><span></span><span id="sync-label">약속 상태를 확인하고 있어요</span></div>
+          </aside>
+        </article>
+      </main>
+      <footer><span>마중 · 픽업 약속</span><small>도착 예상 시간은 차량 내비 기준이며 교통 상황에 따라 달라질 수 있습니다.</small></footer>
+    </div>
+  </body>
+</html>

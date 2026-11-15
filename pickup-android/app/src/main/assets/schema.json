@@ -1,0 +1,71 @@
+{
+  "packageName": "kr.ddakta.pickup",
+  "appDescription": "Majung (마중) helps a driver pick someone up now. Choose only passenger and destination, depart with car navigation, and share live navigation ETA in an invitation link. No scheduled meeting date or time is needed.",
+  "invokeWord": "마중",
+  "version": "0.2.1",
+  "actionCalls": [
+    {
+      "type": "function",
+      "function": {
+        "name": "DDAKTA_CREATE_PICKUP",
+        "description": "Prepare an immediate pickup from the passenger name and meeting place, then open vehicle navigation search for that place after the driver approves the summary. The driver selects the exact destination and confirms departure before live ETA sharing and contact SMS review; no meeting date or time is needed and no message is sent automatically.",
+        "component": "activity",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": "string",
+              "enum": [
+                "collect",
+                "confirm",
+                "cancel"
+              ],
+              "description": "Collect or cancel an immediate pickup, or confirm after the driver approves the summary. Confirm repeats the unchanged passengerName and place. Do not ask for date or time."
+            },
+            "sessionId": {
+              "type": "string",
+              "description": "An optional draft reference returned by the app. Without internal references, confirmation requires one unambiguous reviewed draft and all its unchanged details."
+            },
+            "confirmationToken": {
+              "type": "string",
+              "description": "An optional confirmation reference returned by the app for a particular reviewed draft. Supplied references must match that draft."
+            },
+            "passengerName": {
+              "type": "string",
+              "description": "The name or label of the passenger to pick up."
+            },
+            "place": {
+              "type": "string",
+              "description": "The agreed meeting place as stated by the driver."
+            }
+          },
+          "required": [
+            "operation"
+          ]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "MAJUNG_SHARE_INVITATION",
+        "description": "Prepare an existing Majung pickup invitation for SMS review, looking up the spoken recipient name in contacts and selecting a single unambiguous number when access is allowed. Ambiguous matches require user selection, and the final send decision remains in the messaging app.",
+        "component": "activity",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "appointmentId": {
+              "type": "string",
+              "description": "An optional existing appointment UUID returned by Majung. If absent, the user selects an appointment in the app."
+            },
+            "recipientName": {
+              "type": "string",
+              "description": "The recipient name spoken by the driver, used by the app to search contacts after permission is granted. Include this whenever the driver names the recipient; do not invent or supply a phone number."
+            }
+          },
+          "required": []
+        }
+      }
+    }
+  ]
+}

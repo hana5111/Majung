@@ -1,0 +1,20 @@
+html, body { width: 100vw; height: 100vh; margin: 0; font-family: sans-serif; }
+#map { position: fixed; inset: 0; width: 100vw; height: 100vh; }
+body { background: #edf1e9; }
+.leaflet-container { background: #edf1e9; font-family: sans-serif; }
+.leaflet-control-attribution { font-size: 10px; background: rgba(255,255,255,.94) !important; }
+.leaflet-control-attribution a { color: #204b22; }
+.leaflet-control-zoom { border: 1px solid rgba(32,75,34,.15) !important; border-radius: 14px !important; overflow: hidden; box-shadow: 0 3px 12px #204b2215 !important; }
+.leaflet-control-zoom a { color: #204b22 !important; background: #fffffff0 !important; width: 34px !important; height: 34px !important; line-height: 34px !important; }
+.demo-label { position: absolute; top: 12px; left: 12px; z-index: 500; font-size: 11px; color: #204b22; background: #fffffff0; padding: 7px 11px; border-radius: 20px; box-shadow: 0 2px 8px #0000000c; pointer-events: none; }
+.majung-pin { background: none; border: none; }
+.pin { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: 2px solid white; border-radius: 50%; box-shadow: 0 3px 12px #204b2240; box-sizing: border-box; }
+.pin svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.pin-place { color: white; background: #204b22; }
+.pin-person { color: #204b22; background: #b4ed76; }
+.pin-car { color: #204b22; background: white; }
+.map-name { border: none; border-radius: 12px; background: #fffffff2; color: #204b22; font-size: 12px; box-shadow: 0 2px 6px #00000010; padding: 4px 8px; }
+.map-name::before { display: none; }
+#loading { position: fixed; z-index: 1000; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 14px; font-size: 14px; color: #204b22; background: rgba(240,244,235,.95); }
+#loading[hidden], #retry[hidden] { display: none; }
+#retry { border: none; border-radius: 20px; background: #b4ed76; color: #204b22; padding: 10px 20px; font: inherit; }

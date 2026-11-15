@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tile.openstreetmap.org; base-uri 'none'; form-action 'none'; frame-src 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="stylesheet" href="vendor/leaflet.css">
+  <link rel="stylesheet" href="map.css">
+  <title>마중 · 픽업 위치 공유 시연</title>
+</head>
+<body>
+  <div id="map" aria-label="약속 장소 주변 실제 지도. 차량·탑승자 위치는 가상입니다."></div>
+  <div class="demo-label">실제 지도 · 시연 위치</div>
+  <div id="loading" role="status"><span id="loading-text">실제 지도를 불러오는 중…</span><button id="retry" hidden>다시 연결</button></div>
+  <script src="vendor/leaflet.js"></script>
+  <script src="map.js"></script>
+</body>
+</html>

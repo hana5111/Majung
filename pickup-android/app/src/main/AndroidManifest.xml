@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="pleos.car.permission.NAVI_ROUTE" />
+    <uses-permission android:name="pleos.car.permission.NAVI_ROUTE_SEARCH" />
+    <uses-permission android:name="pleos.car.permission.NAVI_CUSTOM_MAP" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <queries>
+        <intent><action android:name="android.speech.RecognitionService" /></intent>
+        <intent><action android:name="android.intent.action.TTS_SERVICE" /></intent>
+        <intent>
+            <action android:name="android.intent.action.PICK" />
+            <data android:mimeType="vnd.android.cursor.dir/phone_v2" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="smsto" />
+        </intent>
+        <package android:name="ai.umos.ambientai" />
+    </queries>
+    <uses-feature android:name="android.hardware.type.automotive" android:required="false" />
+    <application
+        android:label="@string/app_name"
+        android:icon="@drawable/ic_ddakta"
+        android:theme="@style/Theme.Ddakta"
+        android:allowBackup="false"
+        android:usesCleartextTraffic="false"
+        android:supportsRtl="true">
+        <service android:name=".PickupTripService" android:exported="false" android:foregroundServiceType="dataSync" />
+        <receiver android:name=".gleo.GleoActionReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="DDAKTA_CREATE_PICKUP" />
+                <action android:name="kr.ddakta.pickup.DDAKTA_CREATE_PICKUP" />
+            </intent-filter>
+        </receiver>
+        <activity android:name=".ContactInviteActivity" android:exported="true" android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="MAJUNG_SHARE_INVITATION" />
+                <action android:name="kr.ddakta.pickup.MAJUNG_SHARE_INVITATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop" android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="DDAKTA_CREATE_PICKUP" />
+                <action android:name="kr.ddakta.pickup.DDAKTA_CREATE_PICKUP" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <!-- Appointment entry is parked-only. Do not claim distractionOptimized. -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
